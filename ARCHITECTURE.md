@@ -41,10 +41,10 @@ graph TD
 
     %% Observability
     subgraph "Observability Stack"
-        CR -.->|Structured Log| Logs[Cloud Logging]
-        CR -.->|Metrics| Mon[Cloud Monitoring]
-        Mon -->|Trigger| Alert[Alert Policy (>5% Errors)]
-        Alert -.->|Notify| Email([DevOps Email])
+        CR -.->|Structured Log| Logs["Cloud Logging"]
+        CR -.->|Metrics| Mon["Cloud Monitoring"]
+        Mon -->|Trigger| Alert["Alert Policy (>5% Errors)"]
+        Alert -.->|Notify| Email(["DevOps Email"])
     end
 
     %% CI/CD Pipeline
