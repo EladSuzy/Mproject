@@ -6,7 +6,7 @@ resource "random_password" "db_password" {
 
 # Secret Manager resource to store the password
 resource "google_secret_manager_secret" "db_password" {
-  secret_id = "${var.service_name}-db-pass"
+  secret_id = "${var.service_name}-${var.environment}-db-pass"
   replication {
     auto {}
   }
@@ -19,14 +19,14 @@ resource "google_secret_manager_secret_version" "db_password_val" {
 
 # Cloud SQL Instance
 resource "google_sql_database_instance" "main" {
-  name             = "${var.service_name}-db-instance"
+  name             = "${var.service_name}-${var.environment}-db"
   database_version = "POSTGRES_15"
   region           = var.region
 
   depends_on = [google_service_networking_connection.private_vpc_connection]
 
   settings {
-    tier = "db-f1-micro" # Use appropriate tier for production (e.g., db-custom-2-4096)
+    tier = var.db_tier
     
     ip_configuration {
       ipv4_enabled    = false

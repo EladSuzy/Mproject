@@ -54,11 +54,20 @@ The service uses a **Serverless VPC Access Connector** (or Direct VPC Egress) to
     cd terraform
     terraform init
     ```
-2.  **Plan & Apply**:
-    ```bash
-    terraform plan -var="project_id=YOUR_PROJECT_ID"
-    terraform apply -var="project_id=YOUR_PROJECT_ID"
-    ```
+3.  **Plan & Apply (Per Environment)**:
+    *   **Development**:
+        ```bash
+        terraform apply -var-file="dev.tfvars"
+        ```
+    *   **Staging**:
+        ```bash
+        terraform apply -var-file="staging.tfvars"
+        ```
+    *   **Production**:
+        ```bash
+        terraform apply -var-file="prod.tfvars"
+        ```
+    *Note: Ensure you update the `project_id` in each `.tfvars` file before running.*
 3.  **CI/CD**:
     Connect your repository to Cloud Build triggers pointing to `cloudbuild.yaml`.
 

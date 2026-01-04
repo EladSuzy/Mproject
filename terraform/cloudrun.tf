@@ -1,10 +1,10 @@
 resource "google_service_account" "run_sa" {
-  account_id   = "${var.service_name}-sa"
-  display_name = "Cloud Run Service Account for ${var.service_name}"
+  account_id   = "${var.environment}-sa"
+  display_name = "Cloud Run SA ${var.environment}"
 }
 
 resource "google_cloud_run_v2_service" "default" {
-  name     = var.service_name
+  name     = "${var.service_name}-${var.environment}"
   location = var.region
   ingress  = "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER"
 
@@ -50,8 +50,8 @@ resource "google_cloud_run_v2_service" "default" {
     }
 
     scaling {
-      min_instance_count = 1
-      max_instance_count = 10
+      min_instance_count = var.min_instances
+      max_instance_count = var.max_instances
     }
   }
 }

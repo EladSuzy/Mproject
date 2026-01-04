@@ -13,7 +13,7 @@ steps:
     args:
       - 'run'
       - 'deploy'
-      - '${_SERVICE_NAME}'
+      - '${_SERVICE_NAME}-${_ENVIRONMENT}'
       - '--image'
       - 'gcr.io/$PROJECT_ID/${_SERVICE_NAME}:$COMMIT_SHA'
       - '--region'
@@ -24,6 +24,7 @@ steps:
 substitutions:
   _SERVICE_NAME: backend-service
   _REGION: us-central1
+  _ENVIRONMENT: dev # Default to dev, override in Trigger
 
 images:
   - 'gcr.io/$PROJECT_ID/${_SERVICE_NAME}:$COMMIT_SHA'

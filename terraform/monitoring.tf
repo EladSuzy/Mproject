@@ -2,7 +2,7 @@
 resource "google_monitoring_dashboard" "cloud_run_dashboard" {
   dashboard_json = <<EOF
 {
-  "displayName": "${var.service_name} Dashboard",
+  "displayName": "${var.service_name} ${var.environment} Dashboard",
   "gridLayout": {
     "widgets": [
       {
@@ -11,7 +11,7 @@ resource "google_monitoring_dashboard" "cloud_run_dashboard" {
           "dataSets": [{
             "timeSeriesQuery": {
               "timeSeriesFilter": {
-                "filter": "resource.type=\"cloud_run_revision\" resource.label.\"service_name\"=\"${var.service_name}\" metric.type=\"run.googleapis.com/request_count\"",
+                "filter": "resource.type=\"cloud_run_revision\" resource.label.\"service_name\"=\"${google_cloud_run_v2_service.default.name}\" metric.type=\"run.googleapis.com/request_count\"",
                 "aggregation": {
                   "perSeriesAligner": "ALIGN_RATE"
                 }
@@ -26,7 +26,7 @@ resource "google_monitoring_dashboard" "cloud_run_dashboard" {
           "dataSets": [{
             "timeSeriesQuery": {
               "timeSeriesFilter": {
-                "filter": "resource.type=\"cloud_run_revision\" resource.label.\"service_name\"=\"${var.service_name}\" metric.type=\"run.googleapis.com/request_latencies\"",
+                "filter": "resource.type=\"cloud_run_revision\" resource.label.\"service_name\"=\"${google_cloud_run_v2_service.default.name}\" metric.type=\"run.googleapis.com/request_latencies\"",
                 "aggregation": {
                   "perSeriesAligner": "ALIGN_PERCENTILE_95"
                 }
@@ -43,12 +43,12 @@ EOF
 
 # Alert Policy: High Error Rate
 resource "google_monitoring_alert_policy" "high_error_rate" {
-  display_name = "${var.service_name} High Error Rate"
+  display_name = "${var.service_name} ${var.environment} High Error Rate"
   combiner     = "OR"
   conditions {
     display_name = "Error Rate > 5%"
     condition_threshold {
-      filter     = "resource.type = \"cloud_run_revision\" AND resource.label.service_name = \"${var.service_name}\" AND metric.type = \"run.googleapis.com/request_count\" AND metric.label.response_code_class = \"5xx\""
+      filter     = "resource.type = \"cloud_run_revision\" AND resource.label.service_name = \"${google_cloud_run_v2_service.default.name}\" AND metric.type = \"run.googleapis.com/request_count\" AND metric.label.response_code_class = \"5xx\""
       duration   = "60s"
       comparison = "COMPARISON_GT"
       aggregations {
