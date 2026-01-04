@@ -1,0 +1,64 @@
+# Architecture Diagram
+
+This document visualizes the complete architecture of the deployed Stateless Backend Service on Google Cloud Platform.
+
+```mermaid
+graph TD
+    %% Users and External Traffic
+    User([User]) -->|HTTPS| GLB[Global Ext Load Balancer]
+    
+    %% Security Perimeter
+    subgraph "Edge Security"
+        GLB -->|Check| CA[Cloud Armor WAF]
+        CA -.->|Block| Blocked([Blocked Traffic])
+        CA -->|Allow| SNEG[Serverless NEG]
+    end
+
+    %% Compute Layer
+    subgraph "Compute (Cloud Run)"
+        SNEG -->|Internal Ingress| CR[Cloud Run Service]
+        
+        %% Auto-Scaling Logic
+        CR -.->|Autoscale| Autoscaler{Autoscaler}
+        Autoscaler -.->|0...N| CR
+    end
+
+    %% Configuration & Secrets
+    subgraph "Configuration Management"
+        SM[Secret Manager] -.->|Mount /secrets/db-pass| CR
+        Env[Env Vars] -.->|Inject DB_HOST| CR
+    end
+    
+    %% Networking & Data Access
+    subgraph "VPC Network (Private)"
+        CR -- Direct VPC Egress --> ServerlessConnector[Serverless Connector]
+        ServerlessConnector -->|10.8.0.0/28| PSA[Private Service Access]
+        
+        subgraph "Data Layer"
+            PSA -->|Private IP| CloudSQL[(Cloud SQL Postgres)]
+        end
+    end
+
+    %% Observability
+    subgraph "Observability Stack"
+        CR -.->|Structured Log| Logs["Cloud Logging"]
+        CR -.->|Metrics| Mon["Cloud Monitoring"]
+        Mon -->|Trigger| Alert["Alert Policy (>5% Errors)"]
+        Alert -.->|Notify| Email(["DevOps Email"])
+    end
+
+    %% CI/CD Pipeline
+    subgraph "CI/CD (Cloud Build)"
+        Dev[Developer] -->|Push| Git[GitHub Repo]
+        Git -->|Trigger| CB[Cloud Build]
+        CB -->|Build| Docker[Docker Image]
+        Docker -->|Push| AR[Artifact Registry]
+        AR -->|Deploy| CR
+    end
+
+    %% Styles
+    style User fill:#f9f,stroke:#333
+    style GLB fill:#cce6ff,stroke:#005c99
+    style CR fill:#326ce5,stroke:#fff,color:#fff
+    style CloudSQL fill:#4285f4,stroke:#fff,color:#fff
+```
